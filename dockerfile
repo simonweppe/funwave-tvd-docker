@@ -1,7 +1,8 @@
 ######################
 ##https://github.com/agaveplatform/SC17-container-tutorial/blob/master/06-Containerizing-Existing-Applications.md
 ##build using:
-# docker build --rm -t funwave-tvd $(pwd)
+# docker build -t funwave-tvd:latest .  (if using latest code)
+# docker build -t funwave-tvd:3.5 .  (if using latest given release)
 # #example usage : 
 # docker -it run funwave-tvd:latest
 # cd /FUNWAVE-TVD/simple_cases/beach_2d
@@ -16,7 +17,7 @@ MAINTAINER Rion Dooley <dooley@tacc.utexas.edu>
 
 # add build tools and python to the sandbox
 RUN apt-get update
-RUN apt-get install -y --allow-unauthenticated build-essential findutils python3 python3-pip wget make git patch flex gfortran && \
+RUN apt-get install -y --allow-unauthenticated build-essential findutils python3 python3-pip wget make git patch flex gfortran unzip && \
     cd /home && \
     wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.3.tar.gz && \
     tar xzvf openmpi-4.0.3.tar.gz
@@ -30,26 +31,24 @@ RUN cd /home/openmpi-4.0.3 && \
 
 ENV LD_LIBRARY_PATH /usr/local/lib
 
-# add application code, funwave-tvd
-# and compile the model
-#
-# Note we are cloning the "dev" version here ..probably better to use release ?
-# see alternative below 
 WORKDIR /model
-RUN cd /model && \
-    git clone https://github.com/fengyanshi/FUNWAVE-TVD && \
-    cd FUNWAVE-TVD/ && \
+
+# add application funwave-tvd code & compile the model
+#
+# Option 1 : use a released version (may need to edit number)
+#
+# to download a given release instead..something along these lines :
+# see here https://hub.docker.com/r/lsucrc/funwave-tvd/dockerfile/
+
+RUN wget --secure-protocol=auto https://github.com/fengyanshi/FUNWAVE-TVD/archive/Version_3.5.zip && \
+    unzip Version_3.5.zip && \
+    cd FUNWAVE-TVD-Version_3.5 && \
     perl -p -i -e 's/FLAG_8 = -DCOUPLING/#$&/' Makefile && \
     make
 
-
-
-# to download a given release instead..something along these lines :
-#
-# see here https://hub.docker.com/r/lsucrc/funwave-tvd/dockerfile/
-# RUN wget --secure-protocol=auto https://github.com/fengyanshi/FUNWAVE-TVD/archive/Version_3.5.zip && \
-#    unzip Version_3.5.zip
-# RUN cd && \
+# Option 2 : cloning the "dev" version
+# 
+#RUN cd /model && \
 #    git clone https://github.com/fengyanshi/FUNWAVE-TVD && \
 #    cd FUNWAVE-TVD/ && \
 #    perl -p -i -e 's/FLAG_8 = -DCOUPLING/#$&/' Makefile && \
