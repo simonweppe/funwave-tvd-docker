@@ -28,13 +28,13 @@
 #to get rid of error message : "Read -1, expected 256000, errno = 1"
 #######################
 
-FROM ubuntu:20.04
+FROM ubuntu:16.04
 
 MAINTAINER Rion Dooley <dooley@tacc.utexas.edu>
 
 # add build tools and python to the sandbox
 RUN apt-get update
-RUN apt-get install -y --allow-unauthenticated build-essential findutils python3 python3-pip wget make git patch flex gfortran unzip vim && \
+RUN apt-get install -y --allow-unauthenticated build-essential findutils python3 python3-pip wget make git patch flex gfortran unzip && \
     cd /home && \
     wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.3.tar.gz && \
     tar xzvf openmpi-4.0.3.tar.gz
@@ -57,24 +57,12 @@ WORKDIR /model
 # to download a given release instead..something along these lines :
 # see here https://hub.docker.com/r/lsucrc/funwave-tvd/dockerfile/
 
-#https://fengyanshi.github.io/build/html/make_and_cml_input.html
-# build using GNU compilers
-RUN wget --secure-protocol=auto https://github.com/fengyanshi/FUNWAVE-TVD/archive/refs/tags/Version_3.6.zip && \
-    unzip Version_3.6.zip && \
-    cd FUNWAVE-TVD-Version_3.6/GNUMake && \  
+RUN wget --secure-protocol=auto https://github.com/fengyanshi/FUNWAVE-TVD/archive/Version_3.5.zip && \
+    unzip Version_3.5.zip && \
+    cd FUNWAVE-TVD-Version_3.5 && \
+    perl -p -i -e 's/FLAG_8 = -DCOUPLING/#$&/' Makefile && \
     make
 
-# test using a simple_examples
-# RUN cd /model/FUNWAVE-TVD-Version_3.6/simple_cases/surface_wave_1d/input_files &&\
-#     make
-
-#################################################################################################################
-#RUN wget --secure-protocol=auto https://github.com/fengyanshi/FUNWAVE-TVD/archive/refs/tags/Version_3.6.zip && \
-#    unzip Version_3.6.zip && \
-#    cd FUNWAVE-TVD-Version_3.6 && \
-#    perl -p -i -e 's/FLAG_8 = -DCOUPLING/#$&/' Makefile && \
-#    make
-#
 # Option 2 : cloning the "dev" version
 # 
 #RUN cd /model && \
